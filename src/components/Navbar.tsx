@@ -1,11 +1,14 @@
 import { Avatar, Box, Typography } from "@mui/material";
 
 import { colors } from "../constants";
-import { useNavigate } from "react-router-dom";
+
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
+  console.log(location.pathname);
   return (
     <Box
       sx={{
@@ -35,6 +38,7 @@ const Navbar = () => {
             margin: "1rem",
             fontSize: "18px",
             fontWeight: "600",
+            color: location.pathname == "/" ? "black" : "white",
           }}
           onClick={() => navigate("/")}
         >
@@ -48,6 +52,7 @@ const Navbar = () => {
             margin: "1rem",
             fontSize: "18px",
             fontWeight: "600",
+            color: location.pathname == "/tasks" ? "black" : "white",
           }}
           onClick={() => navigate("/tasks")}
         >
@@ -61,6 +66,8 @@ const Navbar = () => {
             margin: "1rem",
             fontSize: "18px",
             fontWeight: "600",
+
+            color: location.pathname == "/contact" ? "black" : "white",
           }}
           onClick={() => navigate("/contact")}
         >
