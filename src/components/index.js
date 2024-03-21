@@ -1,3 +1,3 @@
 import Navbar from "./Navbar";
-
-export { Navbar };
+import Spinner from "./Loader";
+export { Navbar, Spinner };
