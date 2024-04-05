@@ -1,3 +1,4 @@
 import Navbar from "./Navbar";
 import Spinner from "./Loader";
-export { Navbar, Spinner };
+import HomeCard from "./HomeCard";
+export { Navbar, HomeCard, Spinner };

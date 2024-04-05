@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { Typewriter } from "react-simple-typewriter";
 import { colors } from "../constants";
-import { color } from "framer-motion";
+import { HomeCard } from "../components";
 
 const HomePage = () => {
   const handleType = (count: number) => {
@@ -54,13 +54,18 @@ const HomePage = () => {
             loop={5}
             cursor
             cursorStyle="|"
-            typeSpeed={70}
-            deleteSpeed={50}
+            typeSpeed={100}
+            deleteSpeed={70}
             delaySpeed={1000}
             onLoopDone={handleDone}
             onType={handleType}
           />
         </Typography>
+      </Box>
+
+      {/* Cards  */}
+      <Box>
+        <HomeCard />
       </Box>
     </Box>
   );

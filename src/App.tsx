@@ -28,6 +28,26 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const handleWindowSize = () => {
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      const laptopDesktopWidth = 1024; // Adjust this value as needed
+
+      if (screenWidth < laptopDesktopWidth) {
+        alert("This website is only accessible on desktop and laptop devices.");
+      }
+    };
+
+    handleWindowSize();
+
+    window.addEventListener("resize", handleWindowSize);
+
+    return () => {
+      window.removeEventListener("resize", handleWindowSize);
+    };
+  }, []);
+
+  useEffect(() => {
     const checkAuthStatus = () => {
       if (
         localStorage.getItem("user") === null &&
