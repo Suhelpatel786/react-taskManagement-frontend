@@ -51,3 +51,13 @@ body {
   margin-top: -0.5rem;
   text-align: left;
 }
+
+a {
+  color: #d4c2b8;
+  font-style: normal;
+}
+
+a:hover {
+  color: white;
+  font-style: normal;
+}

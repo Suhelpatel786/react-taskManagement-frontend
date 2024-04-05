@@ -1,18 +1,57 @@
-import { Box, Typography } from "@mui/material";
-const HomeCard = () => {
+import { Box, Icon, Typography } from "@mui/material";
+import { BiCalendarCheck } from "react-icons/bi";
+import { colors } from "../constants";
+
+interface CardProps {
+  title: String;
+  IconCompo: any;
+  content: String;
+}
+
+const HomeCard = ({ title, IconCompo, content }: CardProps) => {
   return (
-    <Box sx={{ height: "350px", width: "350px", backgroundColor: "red" }}>
-      <Box>
-        {/* <img src={Task} width={200} height={200} /> */}
+    <Box
+      sx={{
+        height: "350px",
+        width: "350px",
+        backgroundColor: colors.MainDarkColor,
+        borderRadius: "1rem",
+        color: "white",
+        boxShadow:
+          "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;",
+      }}
+    >
+      <Box
+        height={"100%"}
+        width={"100%"}
+        padding={"1rem"}
+        display={"flex"}
+        flexDirection={"column"}
+        justifyContent={"space-evenly"}
+        alignItems={"center"}
+      >
+        {/* icon */}
+
         <Box>
-          <Typography>Effortless Task Management</Typography>
+          <Icon sx={{ fontSize: "55px" }}>
+            <IconCompo
+              style={{
+                color: "#ffffff",
+              }}
+            />
+          </Icon>
         </Box>
+
+        {/* title  */}
         <Box>
-          Stay organized and focused with our powerful task management system.
-          Easily create, prioritize, and track tasks to streamline your
-          workflow. Boost productivity with our intuitive interface, ensuring
-          nothing falls through the cracks. Achieve your goals with ease using
-          our efficient task management solution.
+          <Typography fontSize={"22px"} fontWeight={"600"}>
+            {title}
+          </Typography>
+        </Box>
+
+        {/* content  */}
+        <Box textAlign={"justify"} fontSize={"16px"} fontWeight={"500"}>
+          {content}
         </Box>
       </Box>
     </Box>

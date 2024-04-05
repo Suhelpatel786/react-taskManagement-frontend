@@ -1,8 +1,10 @@
 import React from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Icon, Typography } from "@mui/material";
 import { Typewriter } from "react-simple-typewriter";
-import { colors } from "../constants";
+import { cardDetail, colors } from "../constants";
 import { HomeCard } from "../components";
+import { TiSocialLinkedin } from "react-icons/ti";
+import { TiSocialGithubCircular } from "react-icons/ti";
 
 const HomePage = () => {
   const handleType = (count: number) => {
@@ -15,7 +17,7 @@ const HomePage = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ overflowX: "hidden" }}>
       <Box
         display={"flex"}
         flexDirection={"column"}
@@ -64,8 +66,78 @@ const HomePage = () => {
       </Box>
 
       {/* Cards  */}
-      <Box>
-        <HomeCard />
+      <Box
+        mt={"5rem"}
+        mb={"5rem"}
+        width={"100%"}
+        display={"flex"}
+        alignItems={"center"}
+        justifyContent={"space-evenly"}
+      >
+        {cardDetail.map((card, index) => (
+          <HomeCard
+            key={index}
+            title={card.title}
+            IconCompo={card.icon}
+            content={card.content}
+          />
+        ))}
+      </Box>
+
+      <Box
+        width={"100%"}
+        display={"flex"}
+        alignItems={"center"}
+        gap={".5rem"}
+        justifyContent={"center"}
+      >
+        <Icon
+          sx={{
+            ":hover": {
+              color: "white",
+              boxShadow:
+                "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;",
+            },
+            color: colors.MainDarkColor,
+            fontSize: "50px",
+          }}
+        >
+          <a
+            href="https://github.com/Suhelpatel786/react-taskManagement-frontend"
+            target="_blank"
+          >
+            <TiSocialGithubCircular />
+          </a>
+        </Icon>
+        <Icon
+          sx={{
+            ":hover": {
+              color: "white",
+              boxShadow:
+                "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;",
+            },
+            color: colors.MainDarkColor,
+            fontSize: "50px",
+          }}
+        >
+          <a
+            href="https://www.linkedin.com/in/suhel-patel-54624227b/"
+            target="_blank"
+          >
+            <TiSocialLinkedin />
+          </a>
+        </Icon>
+      </Box>
+
+      <Box
+        width={"100%"}
+        display={"flex"}
+        alignItems={"center"}
+        justifyContent={"center"}
+      >
+        <Typography sx={{ color: colors.MainDarkColor, fontWeight: "500" }}>
+          &copy; 2024 Suhel Patel. All rights reserved.
+        </Typography>
       </Box>
     </Box>
   );
