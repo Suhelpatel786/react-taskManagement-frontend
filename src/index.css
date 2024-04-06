@@ -61,3 +61,22 @@ a:hover {
   color: white;
   font-style: normal;
 }
+
+.task-input {
+  width: 550px !important;
+  padding: 1rem;
+  outline: none;
+  border: none;
+  font-size: 20px;
+  background-color: #d4c2b8;
+  color: white;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+
+::placeholder {
+  color: white;
+}
+
+textarea {
+  font-family: "Albert Sans", sans-serif;
+}
