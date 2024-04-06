@@ -1,13 +1,13 @@
 import { Box, Grid, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { colors } from "../constants";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { colors } from "../constants";
 
 interface TaskCardProps {
   title: string;
   content: string;
   time: string;
-  id?: any;
+  id: string | number;
 }
 
 // Task card component
@@ -20,15 +20,15 @@ const TaskCard: React.FC<TaskCardProps> = ({ time, title, content }) => {
       alignItems="flex-start"
       width="400px"
       height="200px"
-      p=".5rem"
+      p="1rem"
       m="1rem"
-      bgcolor="white"
+      color="white"
+      bgcolor={colors.MainDarkColor}
       borderRadius="10px"
       boxShadow="rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px"
-      color={colors.MainDarkColor}
     >
-      <Typography>{title}</Typography>
-      <Typography>{content}</Typography>
+      <div>{title}</div>
+      <div>{content}</div>
       <Box display="flex" width="100%" justifyContent="flex-end">
         {time}
       </Box>
@@ -37,152 +37,223 @@ const TaskCard: React.FC<TaskCardProps> = ({ time, title, content }) => {
 };
 
 const TaskStatusDragDrop: React.FC = () => {
-  const handleDragDrop = (results: any) => {
-    const { source, destination, type } = results;
+  const [todoList, setTodoList] = useState<TaskCardProps[]>([
+    { title: "Task 1", content: "Task 1 content.....", time: "21:05", id: "1" },
+    { title: "Task 2", content: "Task 2 content.....", time: "21:10", id: "2" },
+    { title: "Task 3", content: "Task 3 content.....", time: "21:15", id: "3" },
+  ]);
+
+  const [inProgressList, setInProgressList] = useState<TaskCardProps[]>([
+    { title: "Task 4", content: "Task 4 content.....", time: "21:20", id: "4" },
+    { title: "Task 5", content: "Task 5 content.....", time: "21:25", id: "5" },
+    { title: "Task 6", content: "Task 6 content.....", time: "21:30", id: "6" },
+  ]);
+
+  const [completedList, setCompletedList] = useState<TaskCardProps[]>([
+    { title: "Task 7", content: "Task 7 content.....", time: "21:35", id: "7" },
+    { title: "Task 8", content: "Task 8 content.....", time: "21:40", id: "8" },
+    { title: "Task 9", content: "Task 9 content.....", time: "21:45", id: "9" },
+  ]);
+
+  const handleDragEnd = (result: any) => {
+    const { source, destination } = result;
 
     if (!destination) return;
 
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    )
-      return;
+    const sourceList = getList(source.droppableId);
+    const destinationList = getList(destination.droppableId);
+    const [removed] = sourceList.splice(source.index, 1);
+    destinationList.splice(destination.index, 0, removed);
 
-    if (type === "group") {
-      const reorderedData: any = [...data];
+    updateLists(
+      sourceList,
+      destinationList,
+      source.droppableId,
+      destination.droppableId
+    );
+  };
 
-      const sourseIndex = source.index;
-
-      const [removedData] = reorderedData.splice(sourseIndex, 1);
-
-      const destinationIndex = destination.index;
-
-      reorderedData.splice(destinationIndex, 0, removedData);
-
-      return setData(reorderedData);
+  const getList = (droppableId: string) => {
+    switch (droppableId) {
+      case "todo":
+        return todoList;
+      case "inProgress":
+        return inProgressList;
+      case "completed":
+        return completedList;
+      default:
+        return [];
     }
   };
 
-  // Task data
-  const tasksData: any = [
-    { title: "Task 1", content: "Task 1 content.....", time: "21:05", id: 1 },
-    { title: "Task 2", content: "Task 2 content.....", time: "21:10", id: 2 },
-    { title: "Task 3", content: "Task 3 content.....", time: "21:15", id: 3 },
-    { title: "Task 4", content: "Task 4 content.....", time: "21:20", id: 4 },
-    { title: "Task 5", content: "Task 5 content.....", time: "21:25", id: 5 },
-    { title: "Task 6", content: "Task 6 content.....", time: "21:30", id: 6 },
-  ];
+  const updateLists = (
+    sourceList: TaskCardProps[],
+    destinationList: TaskCardProps[],
+    sourceDroppableId: string,
+    destinationDroppableId: string
+  ) => {
+    switch (sourceDroppableId) {
+      case "todo":
+        setTodoList(sourceList);
+        break;
+      case "inProgress":
+        setInProgressList(sourceList);
+        break;
+      case "completed":
+        setCompletedList(sourceList);
+        break;
+      default:
+        break;
+    }
 
-  const [data, setData] = useState<any>(tasksData);
+    switch (destinationDroppableId) {
+      case "todo":
+        setTodoList(destinationList);
+        break;
+      case "inProgress":
+        setInProgressList(destinationList);
+        break;
+      case "completed":
+        setCompletedList(destinationList);
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
-    <DragDropContext onDragEnd={(result) => handleDragDrop(result)}>
-      <Grid container mt={5} columns={3}>
-        <Grid item lg={1}>
-          <Droppable droppableId="ROOT" type="group" direction="vertical">
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Grid container mt={5} spacing={2}>
+        <Grid item xs={4}>
+          <Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
+            <Typography
+              sx={{
+                mr: "2.5rem",
+                fontSize: "20px",
+                fontWeight: "700",
+                bgcolor: "white",
+                px: "2rem",
+                py: ".5rem",
+                borderRadius: "5px",
+                boxShadow:
+                  "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;",
+                color: colors.MainDarkColor,
+              }}
+            >
+              TODO
+            </Typography>
+          </Box>
+
+          <Droppable droppableId="todo">
             {(provided) => (
-              <Box
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                mx="2rem"
-                mt="2rem"
-                sx={{ backgroundColor: "red" }}
-              >
-                {data.map((data: any, index: number) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {todoList.map((task, index) => (
                   <Draggable
-                    draggableId={data.id.toString()}
-                    key={data.id.toString()}
+                    key={task.id}
+                    draggableId={task.id.toString()}
                     index={index}
                   >
                     {(provided) => (
-                      <Box
+                      <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
                       >
-                        <TaskCard
-                          time={data.time}
-                          title={data.title}
-                          content={data.content}
-                        />
-                      </Box>
+                        <TaskCard {...task} />
+                      </div>
                     )}
                   </Draggable>
                 ))}
                 {provided.placeholder}
-              </Box>
+              </div>
             )}
           </Droppable>
         </Grid>
-        <Grid item lg={1}>
-          <Droppable droppableId="ROOT1" type="group1" direction="vertical">
+        <Grid item xs={4}>
+          <Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
+            <Typography
+              sx={{
+                mr: "2.5rem",
+                fontSize: "20px",
+                fontWeight: "700",
+                bgcolor: "white",
+                px: "2rem",
+                py: ".5rem",
+                borderRadius: "5px",
+                boxShadow:
+                  "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;",
+                color: colors.MainDarkColor,
+              }}
+            >
+              In-Progress
+            </Typography>
+          </Box>
+          <Droppable droppableId="inProgress">
             {(provided) => (
-              <Box
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                mx="2rem"
-                mt="2rem"
-                sx={{ backgroundColor: "red" }}
-              >
-                {data.map((data: any, index: number) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {inProgressList.map((task, index) => (
                   <Draggable
-                    draggableId={data.id.toString()}
-                    key={data.id.toString()}
+                    key={task.id}
+                    draggableId={task.id.toString()}
                     index={index}
                   >
                     {(provided) => (
-                      <Box
+                      <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
                       >
-                        <TaskCard
-                          time={data.time}
-                          title={data.title}
-                          content={data.content}
-                        />
-                      </Box>
+                        <TaskCard {...task} />
+                      </div>
                     )}
                   </Draggable>
                 ))}
                 {provided.placeholder}
-              </Box>
+              </div>
             )}
           </Droppable>
         </Grid>
-        <Grid item lg={1}>
-          <Droppable droppableId="ROOT2" type="group2" direction="vertical">
+        <Grid item xs={4}>
+          <Box display={"flex"} alignItems={"center"} justifyContent={"center"}>
+            <Typography
+              sx={{
+                mr: "2.5rem",
+                fontSize: "20px",
+                fontWeight: "700",
+                bgcolor: "white",
+                px: "2rem",
+                py: ".5rem",
+                borderRadius: "5px",
+                boxShadow:
+                  "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;",
+                color: colors.MainDarkColor,
+              }}
+            >
+              Completed
+            </Typography>
+          </Box>
+          <Droppable droppableId="completed">
             {(provided) => (
-              <Box
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                mx="2rem"
-                mt="2rem"
-                sx={{ backgroundColor: "red" }}
-              >
-                {data.map((data: any, index: number) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {completedList.map((task, index) => (
                   <Draggable
-                    draggableId={data.id.toString()}
-                    key={data.id.toString()}
+                    key={task.id}
+                    draggableId={task.id.toString()}
                     index={index}
                   >
                     {(provided) => (
-                      <Box
+                      <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
                       >
-                        <TaskCard
-                          time={data.time}
-                          title={data.title}
-                          content={data.content}
-                        />
-                      </Box>
+                        <TaskCard {...task} />
+                      </div>
                     )}
                   </Draggable>
                 ))}
                 {provided.placeholder}
-              </Box>
+              </div>
             )}
           </Droppable>
         </Grid>
