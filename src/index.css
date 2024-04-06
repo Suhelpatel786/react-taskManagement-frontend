@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap");
+
 * {
   margin: 0;
   padding: 0;
@@ -79,4 +81,8 @@ a:hover {
 
 textarea {
   font-family: "Albert Sans", sans-serif;
+}
+
+.indie-flower-regular {
+  font-family: "Indie Flower", cursive !important;
 }
