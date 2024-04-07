@@ -188,14 +188,16 @@ const ProfilePage = () => {
           }}
         >
           <Box width={"100%"} display={"flex"} justifyContent={"center"}>
-            <button
-              className="login-button"
-              style={{ marginRight: ".5rem" }}
-              type="submit"
-              onClick={() => setIsUpdate(!isUpdate)}
-            >
-              {isUpdate ? "Cancel" : "Edit Profile Details"}
-            </button>
+            {!isUpdate && (
+              <button
+                className="login-button"
+                style={{ marginRight: ".5rem" }}
+                type="submit"
+                onClick={() => setIsUpdate(!isUpdate)}
+              >
+                Edit Profile Details
+              </button>
+            )}
 
             {!isUpdate && (
               <button
@@ -280,13 +282,24 @@ const ProfilePage = () => {
                     </p>
                   ) : null}
 
-                  <button
-                    className="login-button"
-                    style={{ marginTop: "1rem" }}
-                    type="submit"
-                  >
-                    Update
-                  </button>
+                  <Box>
+                    <button
+                      className="login-button"
+                      style={{ marginTop: "1rem", marginRight: "1rem" }}
+                      type="submit"
+                    >
+                      Update
+                    </button>
+
+                    <button
+                      className="login-button"
+                      style={{ marginTop: "1rem" }}
+                      type="submit"
+                      onClick={() => setIsUpdate(!isUpdate)}
+                    >
+                      Cancel
+                    </button>
+                  </Box>
                 </Box>
               </form>
             </Box>

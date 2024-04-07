@@ -1,17 +1,83 @@
-import { Box, Button, Grid, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { colors } from "../constants";
 import axios from "axios";
+import { styled } from "@mui/material/styles";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import { AiOutlineDelete } from "react-icons/ai";
+import { ImCancelCircle } from "react-icons/im";
+import { BsArrowsFullscreen } from "react-icons/bs";
+
 interface TaskCardProps {
   title: string;
   content: string;
   time: string;
   id: string | number;
   onClickFunction?: any;
+  handleClickOpen?: any;
 }
+
+interface TaskDetailModalProps {
+  handleClose: any;
+  open: boolean;
+  task: any;
+}
+
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  "& .MuiDialogContent-root": {
+    padding: theme.spacing(2),
+  },
+  "& .MuiDialogActions-root": {
+    padding: theme.spacing(1),
+  },
+}));
+
+const TaskDetailModal = ({ handleClose, open, task }: TaskDetailModalProps) => {
+  return (
+    <BootstrapDialog
+      onClose={handleClose}
+      aria-labelledby="customized-dialog-title"
+      open={open}
+    >
+      <Box minWidth={"400px"}>
+        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+          {task?.title}
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={handleClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <ImCancelCircle />
+        </IconButton>
+        <DialogContent dividers>
+          <Typography gutterBottom>{task?.content}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Box>
+    </BootstrapDialog>
+  );
+};
 
 // Task card component
 const TaskCard: React.FC<TaskCardProps> = ({
@@ -19,6 +85,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   title,
   content,
   onClickFunction,
+  handleClickOpen,
 }) => {
   return (
     <Box
@@ -41,14 +108,31 @@ const TaskCard: React.FC<TaskCardProps> = ({
           sx={{
             backgroundColor: "white",
             ":hover": { backgroundColor: "white" },
+            mr: "1rem",
+          }}
+          onClick={() => handleClickOpen(title, content)}
+        >
+          <BsArrowsFullscreen fontSize={"25px"} color={colors.MainDarkColor} />
+        </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "white",
+            ":hover": { backgroundColor: "white" },
           }}
           onClick={() => onClickFunction()}
         >
           <AiOutlineDelete fontSize={"25px"} color={colors.MainDarkColor} />
         </Button>
       </Box>
-      <div>{title}</div>
-      <div>{content}</div>
+      <div>
+        {title?.length >= 20 ? title?.substring(0, 20) + "...." : title}
+      </div>
+      <div>
+        {content?.length >= 120
+          ? content?.substring(0, 120) + "....."
+          : content}
+      </div>
       <Box display="flex" width="100%" justifyContent="flex-end">
         {time}
       </Box>
@@ -57,6 +141,20 @@ const TaskCard: React.FC<TaskCardProps> = ({
 };
 
 const TaskStatusDragDrop: React.FC = () => {
+  const [open, setOpen] = useState<boolean>(false);
+  const [dataForModal, setDataForModal] = useState<any>({
+    title: "",
+    content: "",
+  });
+
+  const handleClickOpen = (title: String, content: String) => {
+    setDataForModal({ title: title, content: content });
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   const [todoList, setTodoList] = useState<TaskCardProps[]>([
     // { title: "Task 1", content: "Task 1 content.....", time: "21:05", id: "1" },
     // { title: "Task 2", content: "Task 2 content.....", time: "21:10", id: "2" },
@@ -66,8 +164,6 @@ const TaskStatusDragDrop: React.FC = () => {
   const [inProgressList, setInProgressList] = useState<TaskCardProps[]>([]);
 
   const [completedList, setCompletedList] = useState<TaskCardProps[]>([]);
-
-  console.log({ todoList });
 
   const handleDragEnd = (result: any) => {
     const { source, destination } = result;
@@ -233,6 +329,7 @@ const TaskStatusDragDrop: React.FC = () => {
                         <TaskCard
                           {...task}
                           onClickFunction={() => deleteTask(task?.id)}
+                          handleClickOpen={handleClickOpen}
                         />
                       </div>
                     )}
@@ -332,6 +429,12 @@ const TaskStatusDragDrop: React.FC = () => {
           </Droppable>
         </Grid>
       </Grid>
+
+      <TaskDetailModal
+        open={open}
+        task={dataForModal}
+        handleClose={handleClose}
+      />
       <ToastContainer />
     </DragDropContext>
   );

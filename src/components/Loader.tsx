@@ -1,16 +1,25 @@
 import React from "react";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Box } from "@mui/material";
+import { colors } from "../constants";
 
 const Spinner: React.FC = () => {
   const spinnerStyle: React.CSSProperties = {
     margin: "100px auto",
-    color: "#1976d2", // Replace with your desired color
+    color: colors.MainDarkColor, // Replace with your desired color
   };
 
   return (
-    <div style={spinnerStyle}>
+    <Box
+      width={"100%"}
+      height={"100%"}
+      display={"flex"}
+      alignItems={"center"}
+      justifyContent={"center"}
+      style={spinnerStyle}
+    >
       <CircularProgress size={50} thickness={5} />
-    </div>
+    </Box>
   );
 };
 
