@@ -9,7 +9,7 @@ import { TiSocialGithubCircular } from "react-icons/ti";
 const HomePage = () => {
   const handleType = (count: number) => {
     // access word count number
-    console.log(count);
+    // console.log(count);
   };
 
   const handleDone = () => {

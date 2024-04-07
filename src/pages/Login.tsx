@@ -4,6 +4,8 @@ import * as Yup from "yup";
 
 import { colors } from "../constants";
 import { useNavigate } from "react-router-dom";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import axios from "axios";
 
 const Login = () => {
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -28,8 +30,48 @@ const Login = () => {
     onSubmit: (values) => handleLogin(),
   });
 
-  const handleLogin = () => {
-    navigate("/");
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/login", {
+        ...values,
+      });
+
+      localStorage.setItem("user", JSON.stringify(response.data.data));
+
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data?.data);
+
+      toast.success(response?.data?.message || "User login successfully", {
+        position: "top-right",
+        autoClose: 100,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        onClose: () => {
+          if (response.status === 200) {
+            navigate("/");
+          }
+        },
+      });
+    } catch (error: any) {
+      console.log("Sign-UP API error:", error);
+
+      toast.error(error?.response?.data?.error || "Unknown error", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
   };
 
   return (
@@ -118,6 +160,7 @@ const Login = () => {
           </Box>
         </Box>
       </form>
+      <ToastContainer />
     </Box>
   );
 };

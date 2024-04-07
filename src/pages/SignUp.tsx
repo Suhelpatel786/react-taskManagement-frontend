@@ -1,9 +1,13 @@
 import { Box, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
 import { colors } from "../constants";
+
+import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignUp = () => {
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -32,10 +36,46 @@ const SignUp = () => {
     onSubmit: (values) => handleLogin(),
   });
 
-  const handleLogin = () => {
-    localStorage.setItem("user", "Details");
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/signup", {
+        ...values,
+      });
 
-    navigate("/login");
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data?.message);
+
+      toast.success(response?.data?.message || "User registered successfully", {
+        position: "top-right",
+        autoClose: 100,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        onClose: () => {
+          if (response.status === 201) {
+            navigate("/login");
+          }
+        },
+      });
+    } catch (error: any) {
+      console.log("Sign-UP API error:", error);
+
+      toast.error(error?.response?.data?.error || "Unknown error", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
   };
 
   return (
@@ -116,6 +156,7 @@ const SignUp = () => {
           </button>
         </Box>
       </form>
+      <ToastContainer />
     </Box>
   );
 };
