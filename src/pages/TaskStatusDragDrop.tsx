@@ -1,7 +1,9 @@
 import { Box, Grid, Typography } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { colors } from "../constants";
+import axios from "axios";
+import { Bounce, ToastContainer, toast } from "react-toastify";
 
 interface TaskCardProps {
   title: string;
@@ -38,22 +40,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ time, title, content }) => {
 
 const TaskStatusDragDrop: React.FC = () => {
   const [todoList, setTodoList] = useState<TaskCardProps[]>([
-    { title: "Task 1", content: "Task 1 content.....", time: "21:05", id: "1" },
-    { title: "Task 2", content: "Task 2 content.....", time: "21:10", id: "2" },
-    { title: "Task 3", content: "Task 3 content.....", time: "21:15", id: "3" },
+    // { title: "Task 1", content: "Task 1 content.....", time: "21:05", id: "1" },
+    // { title: "Task 2", content: "Task 2 content.....", time: "21:10", id: "2" },
+    // { title: "Task 3", content: "Task 3 content.....", time: "21:15", id: "3" },
   ]);
 
-  const [inProgressList, setInProgressList] = useState<TaskCardProps[]>([
-    { title: "Task 4", content: "Task 4 content.....", time: "21:20", id: "4" },
-    { title: "Task 5", content: "Task 5 content.....", time: "21:25", id: "5" },
-    { title: "Task 6", content: "Task 6 content.....", time: "21:30", id: "6" },
-  ]);
+  const [inProgressList, setInProgressList] = useState<TaskCardProps[]>([]);
 
-  const [completedList, setCompletedList] = useState<TaskCardProps[]>([
-    { title: "Task 7", content: "Task 7 content.....", time: "21:35", id: "7" },
-    { title: "Task 8", content: "Task 8 content.....", time: "21:40", id: "8" },
-    { title: "Task 9", content: "Task 9 content.....", time: "21:45", id: "9" },
-  ]);
+  const [completedList, setCompletedList] = useState<TaskCardProps[]>([]);
+
+  console.log({ todoList });
 
   const handleDragEnd = (result: any) => {
     const { source, destination } = result;
@@ -121,6 +117,46 @@ const TaskStatusDragDrop: React.FC = () => {
     }
   };
 
+  // task status = Todo
+  const getTodoTasks = async () => {
+    try {
+      const todoArray: any = [];
+      const tasks = await axios.get("http://localhost:3000/task/TODO");
+      const data = tasks.data;
+
+      console.log(data);
+      for (let i = 0; i < tasks.data?.length; i++) {
+        todoArray.push({
+          id: data[i]?._id,
+          title: data[i]?.title,
+          content: data[i]?.content,
+          time: "45:12",
+        });
+      }
+
+      setTodoList(todoArray);
+      console.log(tasks.data);
+    } catch (error: any) {
+      console.log({ error });
+
+      toast.error(error?.response?.data?.error || "Unknown error", {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
+  };
+
+  useEffect(() => {
+    getTodoTasks();
+  }, []);
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <Grid container mt={5} spacing={2}>
@@ -150,7 +186,7 @@ const TaskStatusDragDrop: React.FC = () => {
                 {todoList.map((task, index) => (
                   <Draggable
                     key={task.id}
-                    draggableId={task.id.toString()}
+                    draggableId={task.id?.toString()}
                     index={index}
                   >
                     {(provided) => (
@@ -194,7 +230,7 @@ const TaskStatusDragDrop: React.FC = () => {
                 {inProgressList.map((task, index) => (
                   <Draggable
                     key={task.id}
-                    draggableId={task.id.toString()}
+                    draggableId={task.id?.toString()}
                     index={index}
                   >
                     {(provided) => (
@@ -238,7 +274,7 @@ const TaskStatusDragDrop: React.FC = () => {
                 {completedList.map((task, index) => (
                   <Draggable
                     key={task.id}
-                    draggableId={task.id.toString()}
+                    draggableId={task.id?.toString()}
                     index={index}
                   >
                     {(provided) => (
@@ -258,6 +294,7 @@ const TaskStatusDragDrop: React.FC = () => {
           </Droppable>
         </Grid>
       </Grid>
+      <ToastContainer />
     </DragDropContext>
   );
 };

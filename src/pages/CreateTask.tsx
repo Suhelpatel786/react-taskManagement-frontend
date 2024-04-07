@@ -4,6 +4,8 @@ import { colors } from "../constants";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { title } from "process";
+import axios from "axios";
+import { Bounce, ToastContainer, toast } from "react-toastify";
 const CreateTask = () => {
   //title
   //content
@@ -14,26 +16,61 @@ const CreateTask = () => {
     title: Yup.string()
       .required("Please insert title of your task")
       .min(3, "Must be 3 characters of more")
-      .max(30, "Must be 30 characters or less"),
+      .max(80, "Must be 30 characters or less"),
     content: Yup.string()
       .required("Please insert content of your task")
       .min(10, "Must be 10 characters or more")
       .max(500, "Must be 500 characters or less"),
   });
 
-  const handleTaskSubmit = () => {
-    console.log(values);
+  const handleTaskSubmit = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/create/task", {
+        ...values,
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data?.data);
+
+      // resetForm();
+
+      toast.success(response?.data?.message || "Task created successfully", {
+        position: "top-right",
+        autoClose: 100,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    } catch (error: any) {
+      console.log("Task create API error:", error);
+
+      toast.error(error?.response?.data?.error || "Unknown error", {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
   };
 
-  const { errors, touched, values, handleSubmit, handleChange } = useFormik({
-    initialValues: {
-      title: "",
-      content: "",
-      status: "",
-    },
-    validationSchema: TaskSchema,
-    onSubmit: (values) => handleTaskSubmit(),
-  });
+  const { errors, touched, values, handleSubmit, handleChange, resetForm } =
+    useFormik({
+      initialValues: {
+        title: "",
+        content: "",
+      },
+      validationSchema: TaskSchema,
+      onSubmit: () => handleTaskSubmit(),
+    });
 
   return (
     <Box>
@@ -65,7 +102,6 @@ const CreateTask = () => {
               // type="email"
               className="task-input"
               name="title"
-              autoComplete="off"
               onChange={handleChange}
               placeholder="Enter title"
             />
@@ -82,7 +118,6 @@ const CreateTask = () => {
               style={{ marginTop: "2rem" }}
               className="task-input"
               name="content"
-              autoComplete="off"
               onChange={handleChange}
               placeholder="Enter content"
             />
@@ -93,7 +128,7 @@ const CreateTask = () => {
               </p>
             ) : null}
 
-            <select
+            {/* <select
               style={{ marginTop: "2rem" }}
               name="status"
               onChange={handleChange}
@@ -103,7 +138,7 @@ const CreateTask = () => {
               <option value={"high"}>High Priority</option>
               <option value={"medium"}>Medium Priority</option>
               <option value={"low"}>Low Priority</option>
-            </select>
+            </select> */}
 
             <button
               className="login-button"
@@ -114,6 +149,7 @@ const CreateTask = () => {
             </button>
           </Box>
         </form>
+        <ToastContainer />
       </Box>
     </Box>
   );
