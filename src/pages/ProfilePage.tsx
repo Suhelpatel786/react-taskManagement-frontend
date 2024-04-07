@@ -18,6 +18,7 @@ import { CiUser } from "react-icons/ci";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Bounce, ToastContainer, toast } from "react-toastify";
 
 interface DeleteAccountProps {
   open: boolean;
@@ -44,9 +45,16 @@ const AlertDeleteAccountModal = ({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>No</Button>
-        <Button onClick={() => handleActionFunction()} autoFocus>
-          Yes
+        <Button onClick={handleClose} variant="contained">
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "red" }}
+          onClick={() => handleActionFunction()}
+          autoFocus
+        >
+          Remove
         </Button>
       </DialogActions>
     </Dialog>
@@ -58,10 +66,14 @@ const ProfilePage = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [isUpdate, setIsUpdate] = useState<boolean>(false);
 
+  //user credentials
+  let jsonText: any = localStorage.getItem("user");
+  const data: any = JSON.parse(jsonText);
+
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const ProfileSchema = Yup.object({
-    name: Yup.string()
+    userName: Yup.string()
       .required("Please Enter your name")
       .min(3, "Must 3 character or more")
       .max(20, "Must 20 character or less"),
@@ -74,14 +86,50 @@ const ProfilePage = () => {
       .max(8, "Must be 8 characters or less"),
   });
 
-  const handleUpdate = () => {
-    console.log(values);
+  const handleUpdate = async () => {
+    try {
+      const response = await axios.put(
+        `http://localhost:3000/user/update/${data?._id}`,
+        {
+          ...values,
+        }
+      );
+
+      toast.success(response?.data?.message || "Details Updated successfully", {
+        position: "top-right",
+        autoClose: 10,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        onClose: () => {
+          setIsUpdate(!isUpdate);
+        },
+      });
+
+      localStorage.setItem("user", JSON.stringify(response.data?.data));
+
+      console.log(response.data);
+    } catch (error: any) {
+      console.log("USER UPDATE API ", error);
+      toast.error(error?.response?.data?.error || "Unknown error", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
   };
 
   const deleteAccount = async () => {
-    const jsonText: any = localStorage.getItem("user");
-    const data = JSON.parse(jsonText);
-
     const resposen = await axios.delete(
       `http://localhost:3000/user/delete/${data?._id}`
     );
@@ -102,9 +150,9 @@ const ProfilePage = () => {
 
   const { errors, values, touched, handleChange, handleSubmit } = useFormik({
     initialValues: {
-      name: "Suhel Patel",
-      email: "suhel@gmail.com",
-      password: "suhel@123",
+      userName: data?.userName,
+      email: data?.email,
+      password: data?.password,
     },
     validationSchema: ProfileSchema,
     onSubmit: (values) => handleUpdate(),
@@ -185,19 +233,19 @@ const ProfilePage = () => {
                   <input
                     // type="email"
                     className="task-input"
-                    name="name"
-                    value={values.name}
+                    name="userName"
+                    value={values.userName}
                     style={{ marginBottom: "2rem" }}
                     autoComplete="off"
                     onChange={handleChange}
                     placeholder="Enter name"
                   />
 
-                  {touched.name && errors.name ? (
+                  {touched.userName && errors.userName && (
                     <p style={{ marginTop: ".5rem" }} className="error-p">
-                      {errors.name}
+                      {String(errors.userName)}
                     </p>
-                  ) : null}
+                  )}
 
                   <input
                     // type="email"
@@ -212,7 +260,7 @@ const ProfilePage = () => {
 
                   {touched.email && errors.email ? (
                     <p style={{ marginTop: ".5rem" }} className="error-p">
-                      {errors.email}
+                      {String(errors.email)}
                     </p>
                   ) : null}
 
@@ -228,7 +276,7 @@ const ProfilePage = () => {
 
                   {touched.email && errors.email ? (
                     <p style={{ marginTop: ".5rem" }} className="error-p">
-                      {errors.email}
+                      {String(errors.password)}
                     </p>
                   ) : null}
 
@@ -268,7 +316,7 @@ const ProfilePage = () => {
                     fontWeight: "500",
                   }}
                 >
-                  {values.name}
+                  {values.userName}
                 </Typography>
               </Box>
               <Box
@@ -333,6 +381,7 @@ const ProfilePage = () => {
         handleActionFunction={deleteAccount}
         handleClose={handleClose}
       />
+      <ToastContainer />
     </Box>
   );
 };

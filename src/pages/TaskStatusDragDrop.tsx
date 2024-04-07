@@ -1,19 +1,25 @@
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { colors } from "../constants";
 import axios from "axios";
 import { Bounce, ToastContainer, toast } from "react-toastify";
-
+import { AiOutlineDelete } from "react-icons/ai";
 interface TaskCardProps {
   title: string;
   content: string;
   time: string;
   id: string | number;
+  onClickFunction?: any;
 }
 
 // Task card component
-const TaskCard: React.FC<TaskCardProps> = ({ time, title, content }) => {
+const TaskCard: React.FC<TaskCardProps> = ({
+  time,
+  title,
+  content,
+  onClickFunction,
+}) => {
   return (
     <Box
       display="flex"
@@ -29,6 +35,18 @@ const TaskCard: React.FC<TaskCardProps> = ({ time, title, content }) => {
       borderRadius="10px"
       boxShadow="rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px"
     >
+      <Box display={"flex"} width={"100%"} justifyContent={"flex-end"}>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "white",
+            ":hover": { backgroundColor: "white" },
+          }}
+          onClick={() => onClickFunction()}
+        >
+          <AiOutlineDelete fontSize={"25px"} color={colors.MainDarkColor} />
+        </Button>
+      </Box>
       <div>{title}</div>
       <div>{content}</div>
       <Box display="flex" width="100%" justifyContent="flex-end">
@@ -153,6 +171,23 @@ const TaskStatusDragDrop: React.FC = () => {
     }
   };
 
+  const deleteTask = async (id: any) => {
+    const jsonText: any = localStorage.getItem("user");
+    const data: any = JSON.parse(jsonText);
+
+    try {
+      const deleteTask = await axios.delete(
+        `http://localhost:3000/delete/task/${id}`
+      );
+
+      getTodoTasks();
+
+      console.log(deleteTask.data?.data);
+    } catch (error) {
+      console.log("DELETE TASK API", error);
+    }
+  };
+
   useEffect(() => {
     getTodoTasks();
   }, []);
@@ -195,7 +230,10 @@ const TaskStatusDragDrop: React.FC = () => {
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
                       >
-                        <TaskCard {...task} />
+                        <TaskCard
+                          {...task}
+                          onClickFunction={() => deleteTask(task?.id)}
+                        />
                       </div>
                     )}
                   </Draggable>
