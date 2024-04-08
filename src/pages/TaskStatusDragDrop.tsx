@@ -25,6 +25,7 @@ interface TaskCardProps {
   time: string;
   id: string | number;
   onClickFunction?: any;
+  status?: any;
   handleClickOpen?: any;
 }
 
@@ -155,25 +156,27 @@ const TaskStatusDragDrop: React.FC = () => {
     setOpen(false);
   };
 
-  const [todoList, setTodoList] = useState<TaskCardProps[]>([
-    // { title: "Task 1", content: "Task 1 content.....", time: "21:05", id: "1" },
-    // { title: "Task 2", content: "Task 2 content.....", time: "21:10", id: "2" },
-    // { title: "Task 3", content: "Task 3 content.....", time: "21:15", id: "3" },
-  ]);
+  const [todoList, setTodoList] = useState<TaskCardProps[]>([]);
 
   const [inProgressList, setInProgressList] = useState<TaskCardProps[]>([]);
 
   const [completedList, setCompletedList] = useState<TaskCardProps[]>([]);
 
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = async (result: any) => {
     const { source, destination } = result;
 
     if (!destination) return;
+
+    const draggedTask = getList(source.droppableId)[source.index];
+
+    console.log({ draggedTask });
 
     const sourceList = getList(source.droppableId);
     const destinationList = getList(destination.droppableId);
     const [removed] = sourceList.splice(source.index, 1);
     destinationList.splice(destination.index, 0, removed);
+
+    console.log({ sourceList }, { destinationList });
 
     updateLists(
       sourceList,
@@ -181,6 +184,22 @@ const TaskStatusDragDrop: React.FC = () => {
       source.droppableId,
       destination.droppableId
     );
+
+    const status: String =
+      destination.droppableId === "todo"
+        ? "TODO"
+        : destination.droppableId === "inProgress"
+        ? "INPROGRESS"
+        : "COMPLETED";
+
+    try {
+      await axios.put(`http://localhost:3000/task/status/${draggedTask.id}`, {
+        status: status,
+      });
+    } catch (error) {
+      console.error("Error updating task status:", error);
+      // Handle error
+    }
   };
 
   const getList = (droppableId: string) => {
@@ -238,21 +257,18 @@ const TaskStatusDragDrop: React.FC = () => {
       const tasks = await axios.get("http://localhost:3000/task/TODO");
       const data = tasks.data;
 
-      console.log(data);
       for (let i = 0; i < tasks.data?.length; i++) {
         todoArray.push({
           id: data[i]?._id,
           title: data[i]?.title,
           content: data[i]?.content,
+          status: data[i]?.status,
           time: "45:12",
         });
       }
 
       setTodoList(todoArray);
-      console.log(tasks.data);
     } catch (error: any) {
-      console.log({ error });
-
       toast.error(error?.response?.data?.error || "Unknown error", {
         position: "top-right",
         autoClose: 1000,
@@ -267,18 +283,89 @@ const TaskStatusDragDrop: React.FC = () => {
     }
   };
 
-  const deleteTask = async (id: any) => {
-    const jsonText: any = localStorage.getItem("user");
-    const data: any = JSON.parse(jsonText);
+  //task status = inProgress
+  const getInProgressTasks = async () => {
+    try {
+      const inprogressArray: any = [];
+      const tasks = await axios.get("http://localhost:3000/task/INPROGRESS");
+      const data = tasks.data;
 
+      for (let i = 0; i < tasks.data?.length; i++) {
+        inprogressArray.push({
+          id: data[i]?._id,
+          title: data[i]?.title,
+          content: data[i]?.content,
+          status: data[i]?.status,
+          time: "45:12",
+        });
+      }
+
+      setInProgressList(inprogressArray);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || "Unknown error", {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
+  };
+
+  //task status = completed
+  const getCompletedTasks = async () => {
+    try {
+      const completedArray: any = [];
+      const tasks = await axios.get("http://localhost:3000/task/COMPLETED");
+      const data = tasks.data;
+
+      for (let i = 0; i < tasks.data?.length; i++) {
+        completedArray.push({
+          id: data[i]?._id,
+          title: data[i]?.title,
+          content: data[i]?.content,
+          status: data[i]?.status,
+          time: "45:12",
+        });
+      }
+
+      setCompletedList(completedArray);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || "Unknown error", {
+        position: "top-right",
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
+  };
+
+  const deleteTask = async (id: any, status: any) => {
+    // const jsonText: any = localStorage.getItem("user");
+    // const data: any = JSON.parse(jsonText);
     try {
       const deleteTask = await axios.delete(
         `http://localhost:3000/delete/task/${id}`
       );
 
-      getTodoTasks();
-
-      console.log(deleteTask.data?.data);
+      if (status === "TODO") {
+        getTodoTasks();
+      }
+      if (status === "COMPLETED") {
+        getCompletedTasks();
+      }
+      if (status === "INPROGRESS") {
+        getInProgressTasks();
+      }
     } catch (error) {
       console.log("DELETE TASK API", error);
     }
@@ -286,6 +373,8 @@ const TaskStatusDragDrop: React.FC = () => {
 
   useEffect(() => {
     getTodoTasks();
+    getInProgressTasks();
+    getCompletedTasks();
   }, []);
 
   return (
@@ -328,7 +417,9 @@ const TaskStatusDragDrop: React.FC = () => {
                       >
                         <TaskCard
                           {...task}
-                          onClickFunction={() => deleteTask(task?.id)}
+                          onClickFunction={() =>
+                            deleteTask(task?.id, task?.status)
+                          }
                           handleClickOpen={handleClickOpen}
                         />
                       </div>
@@ -374,7 +465,13 @@ const TaskStatusDragDrop: React.FC = () => {
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
                       >
-                        <TaskCard {...task} />
+                        <TaskCard
+                          {...task}
+                          onClickFunction={() =>
+                            deleteTask(task?.id, task?.status)
+                          }
+                          handleClickOpen={handleClickOpen}
+                        />
                       </div>
                     )}
                   </Draggable>
@@ -418,7 +515,13 @@ const TaskStatusDragDrop: React.FC = () => {
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
                       >
-                        <TaskCard {...task} />
+                        <TaskCard
+                          {...task}
+                          onClickFunction={() =>
+                            deleteTask(task?.id, task?.status)
+                          }
+                          handleClickOpen={handleClickOpen}
+                        />
                       </div>
                     )}
                   </Draggable>
